@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Campaign Codex — D&D Campaign Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Ambient candle glow -->
+    <div class="candle candle-left">
+        <div class="flame-wrap">
+            <div class="flame"></div>
+            <div class="flame inner"></div>
+        </div>
+        <div class="candle-body"></div>
+        <div class="glow"></div>
+    </div>
+    <div class="candle candle-right">
+        <div class="flame-wrap">
+            <div class="flame"></div>
+            <div class="flame inner"></div>
+        </div>
+        <div class="candle-body"></div>
+        <div class="glow"></div>
+    </div>
+
+    <div id="app">
+        <!-- ===== LOADING OVERLAY ===== -->
+        <div id="loading-overlay" class="loading-overlay active">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p>Opening the Codex...</p>
+            </div>
+        </div>
+
+        <!-- ===== AUTH PAGE ===== -->
+        <div id="auth-page" class="page">
+            <div class="auth-container">
+                <div class="title-ornament">&#9876;</div>
+                <h1 class="main-title">The Campaign Codex</h1>
+                <p class="subtitle">A Dungeon Master's Chronicle</p>
+                <div class="title-ornament">&#9876;</div>
+                <div class="auth-box">
+                    <p>Sign in to access your campaign tomes across any device.</p>
+                    <button id="google-signin-btn" class="btn btn-google">
+                        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        Sign in with Google
+                    </button>
+                </div>
+                <p class="auth-note">Your campaigns are stored in the cloud<br>and accessible from any device.</p>
+            </div>
+        </div>
+
+        <!-- ===== LANDING PAGE ===== -->
+        <div id="landing-page" class="page">
+            <div class="user-bar">
+                <span id="user-info" class="user-info"></span>
+                <button id="signout-btn" class="btn btn-small btn-secondary">Sign Out</button>
+            </div>
+            <div class="landing-header">
+                <div class="title-ornament">&#9876;</div>
+                <h1 class="main-title">The Campaign Codex</h1>
+                <p class="subtitle">A Dungeon Master's Chronicle</p>
+                <div class="title-ornament">&#9876;</div>
+            </div>
+            <div class="bookshelf">
+                <div id="workbook-list" class="workbook-grid"></div>
+                <button id="create-workbook-btn" class="btn btn-create" title="Create New Campaign">
+                    <span class="btn-icon">&#128214;</span>
+                    <span>Forge New Campaign</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== WORKBOOK VIEW ===== -->
+        <div id="workbook-view" class="page">
+            <header class="workbook-header">
+                <button id="back-btn" class="btn btn-back">&#9664; Return to Codex</button>
+                <h2 id="campaign-title" class="campaign-title"></h2>
+                <button id="delete-campaign-btn" class="btn btn-danger" title="Delete this campaign">&#128465; Delete</button>
+            </header>
+            <nav id="tab-nav" class="tab-navigation">
+                <button class="tab-btn active" data-tab="summary">&#128220; Summary</button>
+                <button class="tab-btn" data-tab="pcs">&#9876; PCs</button>
+                <button class="tab-btn" data-tab="npcs">&#128122; NPCs</button>
+                <button class="tab-btn" data-tab="session-log">&#128214; Session Log</button>
+                <button class="tab-btn" data-tab="story">&#127758; The Story</button>
+                <button class="tab-btn" data-tab="ideas">&#128161; Ideas</button>
+                <button class="tab-btn" data-tab="brainstorm">&#129504; Brainstorm</button>
+            </nav>
+            <main id="tab-content" class="tab-content parchment">
+                <!-- Dynamic content -->
+            </main>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal" class="modal">
+            <button id="modal-close" class="modal-close">&times;</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-storage-compat.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
