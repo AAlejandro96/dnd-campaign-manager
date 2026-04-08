@@ -20,10 +20,10 @@ const fbStorage = firebase.storage();
 // Offline persistence
 firestore.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 
-// ─── GEMINI CONFIG ───────────────────────────────────────
-const GEMINI_API_KEY = 'AIzaSyBqKskYcVrSOMq34zJebb54CNlf-7YXD70';
-const GEMINI_MODEL = 'gemini-2.0-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+// ─── GROQ CONFIG ─────────────────────────────────────────
+const GROQ_API_KEY = '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';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ─── D&D DATA ────────────────────────────────────────────
 const DND_RACES = [
@@ -607,7 +607,7 @@ function buildAIContext(wb) {
     return ctx;
 }
 
-async function sendToGemini(userMessage, wb) {
+async function sendToAI(userMessage, wb) {
     const campaignContext = buildAIContext(wb);
 
     const systemPrompt = `You are an experienced, creative Dungeon Master assistant and campaign co-planner for a Dungeons & Dragons campaign. You have been given complete knowledge of the campaign (characters, session logs, world lore, and DM ideas). Use this knowledge to give relevant, contextual, and creative suggestions.
@@ -628,29 +628,30 @@ ${campaignContext}`;
 
     // Use last 20 messages for context window efficiency
     const recentHistory = wb.brainstormHistory.slice(-20);
-    const contents = [];
+    const messages = [{ role: 'system', content: systemPrompt }];
 
     recentHistory.forEach(msg => {
-        contents.push({
-            role: msg.role === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.content }]
+        messages.push({
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.content
         });
     });
 
-    contents.push({
-        role: 'user',
-        parts: [{ text: userMessage }]
-    });
+    messages.push({ role: 'user', content: userMessage });
 
     const body = {
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: contents,
-        generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
+        model: GROQ_MODEL,
+        messages: messages,
+        temperature: 0.85,
+        max_tokens: 2048
     };
 
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch(GROQ_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY}`
+        },
         body: JSON.stringify(body)
     });
 
@@ -660,7 +661,7 @@ ${campaignContext}`;
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = data.choices?.[0]?.message?.content;
     if (!text) throw new Error('No response from the Oracle.');
     return text;
 }
@@ -680,7 +681,7 @@ async function handleSendChat() {
     scrollChat();
 
     try {
-        const reply = await sendToGemini(msg, wb);
+        const reply = await sendToAI(msg, wb);
         wb.brainstormHistory.push({ role: 'assistant', content: reply });
         await DB.save(wb);
 
